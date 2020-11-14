@@ -20,5 +20,11 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+      uses: schdck/create-env-json@v1
+      id: create-env
+      with:
+        file-name: 'env.json'
+        mnemonic: ${{ secrets.MNEMONIC }}
+        projectId: ${{ secrets.INFURA_PROJECT_ID }}
     - run: npm install
     - run: npm test
