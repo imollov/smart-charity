@@ -20,8 +20,8 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-      uses: schdck/create-env-json@v1
-      id: create-env
+    - name: create-env-json
+      uses: schdck/create-env-json@v2
       with:
         file-name: 'env.json'
         mnemonic: ${{ secrets.MNEMONIC }}
