@@ -9,6 +9,7 @@ contract BeneficiaryRepository {
         string reason;
         uint256 amount;
         bool paid;
+        uint256 index;
     }
 
     struct ChangeRequest {
@@ -80,7 +81,8 @@ contract BeneficiaryRepository {
             name: _name,
             reason: _reason,
             amount: _amount,
-            paid: false
+            paid: false,
+            index: beneficiaryIndices.length - 1
         });
 
         emit LogAddBeneficiary(_address, block.timestamp);
@@ -104,12 +106,12 @@ contract BeneficiaryRepository {
         isAuthor
     {
         requireBeneficiaryData(_name, _reason, _amount, _address);
-
         pendingBeneficiaries[_address] = Beneficiary({
             name: _name,
             reason: _reason,
             amount: _amount,
-            paid: false
+            paid: false,
+            index: 0
         });
 
         emit LogAddPendingBeneficiary(_address, block.timestamp);
@@ -190,13 +192,12 @@ contract BeneficiaryRepository {
     function removeBeneficiary(address _address)
         internal
     {
+        uint indexToRemove = beneficieries[_address].index;
+        address keyToMove = beneficiaryIndices[beneficiaryIndices.length - 1];
+        beneficiaryIndices[indexToRemove] = keyToMove;
+        beneficieries[keyToMove].index = indexToRemove;
+        beneficiaryIndices.pop();
         delete beneficieries[_address];
-        for (uint256 i = 0; i < beneficiaryIndices.length; i++) {
-            if (beneficiaryIndices[i] == _address) {
-                delete beneficiaryIndices[i];
-                break;
-            }
-        }
     }
 
     function addRequestedBeneficiary(address _address)
