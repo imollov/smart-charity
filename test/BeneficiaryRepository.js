@@ -190,7 +190,7 @@ contract(
           );
           const { ballot } = await beneficiaryRepo.changeRequests(3);
           const changeBallot = await ChangeBallot.at(ballot);
-          await changeBallot.vote(false, { from: donor });
+          await changeBallot.voteAgainst({ from: donor });
 
           await time.increase(time.duration.days(2));
 

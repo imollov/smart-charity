@@ -170,7 +170,7 @@ contract BeneficiaryRepository {
         ChangeBallot ballot = ChangeBallot(request.ballot);
 
         require(ballot.hasFinished(), "Ballot not finished yet");
-        require(ballot.getWinningOption(), "Donors rejected request");
+        require(ballot.isAccepted(), "Donors rejected request");
 
         if (request.removeBeneficiary != address(0)) {
             removeBeneficiary(request.removeBeneficiary);

@@ -3,24 +3,18 @@ pragma solidity >=0.4.22 <0.7.0;
 import "./Campaign.sol";
 
 contract ChangeBallot {
-    struct Voter {
-        bool option;
-        bool voted;
-    }
-
     event LogInitializeBallot(
         address indexed _campaign,
         uint256 indexed _timestamp
     );
 
     event LogVote(
-        bool indexed _option,
         uint256 indexed _timestamp
     );
 
     uint256 public endTimestamp;
-    address[] public voterIndices;
-    mapping(address => Voter) public voters;
+    uint32 public votesAgainst;
+    mapping(address => bool) public voted;
     Campaign public campaign;
 
     constructor(uint256 _endTimestamp, address _campaign)
@@ -32,17 +26,17 @@ contract ChangeBallot {
         emit LogInitializeBallot(_campaign, block.timestamp);
     }
 
-    function vote(bool _option)
+    function voteAgainst()
         public
     {
         require(!hasFinished(), "Expired");
         require(campaign.isDonor(msg.sender), "Not eligible to vote");
-        require(!voters[msg.sender].voted, "Already voted");
+        require(!voted[msg.sender], "Already voted");
 
-        voterIndices.push(msg.sender);
-        voters[msg.sender] = Voter({option: _option, voted: true});
+        voted[msg.sender] = true;
+        votesAgainst += 1;
 
-        emit LogVote(_option, block.timestamp);
+        emit LogVote(block.timestamp);
     }
 
     function hasFinished()
@@ -53,20 +47,14 @@ contract ChangeBallot {
         return now > endTimestamp;
     }
 
-    function getWinningOption()
+    function isAccepted()
         public
         view
         returns (bool)
     {
         // todo: add weight depending on donation size
-        uint256 rejectedCount;
-        for (uint256 i = 0; i < voterIndices.length; i++) {
-            if (voters[voterIndices[i]].option == false) {
-                rejectedCount += 1;
-            }
-        }
         uint256 donorsCount = campaign.getDonorsCount();
-        uint256 acceptedCount = donorsCount - rejectedCount;
+        uint256 acceptedCount = donorsCount - votesAgainst;
         return (acceptedCount / donorsCount) * 100 > 50;
     }
 }

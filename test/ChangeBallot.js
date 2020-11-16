@@ -27,60 +27,42 @@ contract("ChangeBallot", ([author, donor, donor2, notDonor]) => {
   });
 
   context("Deciding winner", () => {
-    it("should have positive outcome if nobody votes", async () => {
-      const winningOption = await changeBallot.getWinningOption();
-      assert.strictEqual(winningOption, true);
+    it("should be accepted if more than 50% didn't reject", async () => {
+      const isAccepted = await changeBallot.isAccepted();
+      assert.strictEqual(isAccepted, true);
     });
 
-    it("should have negative outcome if there's no majority", async () => {
-      await changeBallot.vote(false, { from: donor });
-      const winningOption = await changeBallot.getWinningOption();
-      assert.strictEqual(winningOption, false);
+    it("should be rejected if there's no majority", async () => {
+      await changeBallot.voteAgainst({ from: donor });
+      const isAccepted = await changeBallot.isAccepted();
+      assert.strictEqual(isAccepted, false);
     });
 
-    it("should have negative outcome if more than 50% reject", async () => {
-      await changeBallot.vote(false, { from: donor2 });
-      const winningOption = await changeBallot.getWinningOption();
-      assert.strictEqual(winningOption, false);
-    });
-
-    it("should have positive outcome if more than 50% accept", async () => {
-      campaignEnd = await nextDayInSec();
-      changeBallot = await ChangeBallot.new(campaignEnd, campaign.address);
-      await Promise.all([
-        changeBallot.vote(true, { from: donor }),
-        changeBallot.vote(true, { from: donor2 }),
-      ]);
-
-      const winningOption = await changeBallot.getWinningOption();
-
-      assert.strictEqual(winningOption, true);
+    it("should be rejected if more than 50% reject", async () => {
+      await changeBallot.voteAgainst({ from: donor2 });
+      const isAccepted = await changeBallot.isAccepted();
+      assert.strictEqual(isAccepted, false);
     });
   });
 
   context("Voting", () => {
     it("should allow only donors to vote", async () => {
       await assertRevert(
-        changeBallot.vote(false, { from: notDonor }),
+        changeBallot.voteAgainst({ from: notDonor }),
         "Not eligible to vote"
       );
     });
 
     it("should allow voting once", async () => {
       await assertRevert(
-        changeBallot.vote(false, { from: donor }),
+        changeBallot.voteAgainst({ from: donor }),
         "Already voted"
       );
     });
 
-    it("should count votes", async () => {
-      const voterAddress = await changeBallot.voterIndices(0);
-      assert.equal(voterAddress, donor);
-    });
-
     it("should not allow voting once finished", async () => {
       await time.increase(time.duration.days(2));
-      await assertRevert(changeBallot.vote(false, { from: donor }), "Expired");
+      await assertRevert(changeBallot.voteAgainst({ from: donor }), "Expired");
     });
   });
 });
