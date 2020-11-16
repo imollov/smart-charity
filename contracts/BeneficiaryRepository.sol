@@ -234,12 +234,4 @@ contract BeneficiaryRepository {
             beneficiary.paid
         );
     }
-
-    // function getChangeRequests()
-    //     public
-    //     view
-    //     returns (uint[] memory)
-    // {
-
-    // }
 }
