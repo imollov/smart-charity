@@ -30,11 +30,11 @@ contract Campaign {
         uint256 indexed _timestamp
     );
 
-    address public author;
     string public title;
     string public description;
     uint256 public targetAmount;
     uint256 public endTimestamp;
+    address public author;
     address[] public donorIndices;
     mapping(address => uint256) public donorsAmounts;
     BeneficiaryRepository public beneficiaryRepo;

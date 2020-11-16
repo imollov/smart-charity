@@ -12,9 +12,9 @@ contract BeneficiaryRepository {
     }
 
     struct ChangeRequest {
+        string description;
         address removeBeneficiary;
         address addPendingBeneficiary;
-        string description;
         address ballot;
     }
 
@@ -234,4 +234,12 @@ contract BeneficiaryRepository {
             beneficiary.paid
         );
     }
+
+    // function getChangeRequests()
+    //     public
+    //     view
+    //     returns (uint[] memory)
+    // {
+
+    // }
 }
