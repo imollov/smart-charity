@@ -89,11 +89,14 @@ contract Campaign {
     function claimFunds()
         public
     {
-        require(beneficiaryRepo.isValidBeneficiary(msg.sender), "Not a beneficiary");
+        (, , uint256 amount, bool paid) = beneficiaryRepo.getBeneficiaryByAddress(msg.sender);
+        require(amount > 0, "Not a beneficiary");
+        require(!paid, "Already paid");
         require(isFulfilled(), "Unfulfilled");
 
+        beneficiaryRepo.markBeneficiaryAsPaid(msg.sender);
+
         address payable beneficiary = address(uint160(msg.sender));
-        (, , uint256 amount) = beneficiaryRepo.getBeneficiaryByAddress(msg.sender);
         beneficiary.transfer(amount);
 
         emit LogClaimFunds(msg.sender, amount, block.timestamp);
@@ -107,10 +110,10 @@ contract Campaign {
         require(!isFulfilled(), "Fulfilled");
 
         uint256 amount = donorsAmounts[msg.sender];
+        donorsAmounts[msg.sender] = 0;
+
         address payable donor = address(uint160(msg.sender));
         donor.transfer(amount);
-
-        donorsAmounts[msg.sender] = 0;
 
         emit LogClaimRefund(msg.sender, amount, block.timestamp);
     }

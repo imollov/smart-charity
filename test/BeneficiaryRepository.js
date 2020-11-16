@@ -69,13 +69,6 @@ contract(
           "Already have donors"
         );
       });
-
-      it("should make a valid beneficiary", async () => {
-        const isValidBeneficiary = await beneficiaryRepo.isValidBeneficiary(
-          beneficiary
-        );
-        assert.ok(isValidBeneficiary);
-      });
     });
 
     context("Request change", () => {

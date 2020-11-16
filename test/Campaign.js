@@ -207,5 +207,12 @@ contract("Campagin", ([author, donor, donor2, notDonor, beneficiary]) => {
           .add(claimFundsTxCost)
       );
     });
+
+    it("should allow beneficiaries to claim funds only once", async () => {
+      await assertRevert(
+        campaign.claimFunds({ from: beneficiary }),
+        "Already paid"
+      );
+    });
   });
 });

@@ -8,6 +8,7 @@ contract BeneficiaryRepository {
         string name;
         string reason;
         uint256 amount;
+        bool paid;
     }
 
     struct ChangeRequest {
@@ -50,6 +51,11 @@ contract BeneficiaryRepository {
         _;
     }
 
+    modifier isCampaign() {
+        require(msg.sender == address(campaign), "Restricted access");
+        _;
+    }
+
     constructor()
         public
     {
@@ -73,10 +79,19 @@ contract BeneficiaryRepository {
         beneficieries[_address] = Beneficiary({
             name: _name,
             reason: _reason,
-            amount: _amount
+            amount: _amount,
+            paid: false
         });
 
         emit LogAddBeneficiary(_address, block.timestamp);
+    }
+
+    function markBeneficiaryAsPaid(address _address)
+        public
+        isCampaign
+    {
+        Beneficiary storage beneficiary = beneficieries[_address];
+        beneficiary.paid = true;
     }
 
     function addPendingBeneficiary(
@@ -93,7 +108,8 @@ contract BeneficiaryRepository {
         pendingBeneficiaries[_address] = Beneficiary({
             name: _name,
             reason: _reason,
-            amount: _amount
+            amount: _amount,
+            paid: false
         });
 
         emit LogAddPendingBeneficiary(_address, block.timestamp);
@@ -175,7 +191,6 @@ contract BeneficiaryRepository {
         internal
     {
         delete beneficieries[_address];
-
         for (uint256 i = 0; i < beneficiaryIndices.length; i++) {
             if (beneficiaryIndices[i] == _address) {
                 delete beneficiaryIndices[i];
@@ -198,14 +213,6 @@ contract BeneficiaryRepository {
         delete pendingBeneficiaries[_address];
     }
 
-    function isValidBeneficiary(address _address)
-        public
-        view
-        returns (bool)
-    {
-        return beneficieries[_address].amount > 0;
-    }
-
     function getBeneficiaryAddresses()
         public
         view
@@ -217,9 +224,14 @@ contract BeneficiaryRepository {
     function getBeneficiaryByAddress(address _address)
         public
         view
-        returns (string memory, string memory, uint256)
+        returns (string memory, string memory, uint256, bool)
     {
         Beneficiary storage beneficiary = beneficieries[_address];
-        return (beneficiary.name, beneficiary.reason, beneficiary.amount);
+        return (
+            beneficiary.name,
+            beneficiary.reason,
+            beneficiary.amount,
+            beneficiary.paid
+        );
     }
 }
