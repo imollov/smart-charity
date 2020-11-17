@@ -7,8 +7,8 @@ contract BeneficiaryRepository {
     struct Beneficiary {
         string name;
         string reason;
-        uint256 amount;
         bool paid;
+        uint256 amount;
         uint256 index;
     }
 
